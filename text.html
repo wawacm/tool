@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<!-- saved from url=(0044)http://wap.zhiyun666.xyz/zt/html/h/html.html
+-->
+<html lang="zh-CN">
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script async="" src="https://newcdnjs.wawacm.com/tool/static/zm.js">
+        </script>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+        <meta name="renderer" content="webkit">
+        <title>
+            在线自动排版工具-自定义中文排版-Html文本段落排版工具
+        </title>
+        <meta name="keywords" content="在线自动排版工具,Html文本段落排版工具,在线传统中文排版,新闻排版,在线排版,文章排版,小说排版,贴吧排版">
+        <meta name="description" content="在线自动排版工具:实现任意字符在线排版,Html在线自动排版工具,可清除所有HTML标签,可自定义排版字符,支持转为繁字体排版,可用于小说论文排版,自动排版实现纯文本文章的在线排版工具">
+        <link href="https://newcdnjs.wawacm.com/tool/static/bootstrap3.5min.css" rel="stylesheet" type="text/css">
+        <link href="https://newcdnjs.wawacm.com/tool/static/mainmin.css" rel="stylesheet" type="text/css">
+        <!--[if lt IE 9]>
+            <script type="text/javascript" src="static/js/html5shiv.min.js">
+            </script>
+            <script type="text/javascript" src="static/js/respond.min.js">
+            </script>
+        <![endif]-->
+        <style type="text/css">
+            #_copy{align-items:center;background:#4494d5;border-radius:3px;color:#fff;cursor:pointer;display:flex;font-size:13px;height:30px;justify-content:center;position:absolute;width:60px;z-index:1000}#select-tooltip,#sfModal,.modal-backdrop,div[id^=reader-helper]{display:none!important}.modal-open{overflow:auto!important}._sf_adjust_body{padding-right:0!important}.super_copy_btns_div{position:fixed;width:154px;left:10px;top:45%;background:#e7f1ff;border:2px
+            solid #4595d5;font-weight:600;border-radius:2px;font-family:-apple-system,BlinkMacSystemFont,Segoe
+            UI,PingFang SC,Hiragino Sans GB,Microsoft YaHei,Helvetica Neue,Helvetica,Arial,sans-serif,Apple
+            Color Emoji,Segoe UI Emoji,Segoe UI Symbol;z-index:5000}.super_copy_btns_logo{width:100%;background:#4595d5;text-align:center;font-size:12px;color:#e7f1ff;line-height:30px;height:30px}.super_copy_btns_btn{display:block;width:128px;height:28px;background:#7f5711;border-radius:4px;color:#fff;font-size:12px;border:0;outline:0;margin:8px
+            auto;font-weight:700;cursor:pointer;opacity:.9}.super_copy_btns_btn:hover{opacity:.8}.super_copy_btns_btn:active{opacity:1}
+        </style>
+    </head>
+    
+    <body>
+        <div class="alert alert-success alert-dismissible" role="alert">
+            在线自动排版工具（支持繁体字快速转换，可一键清除所有HTML标签）
+        </div>
+        <div class="panel">
+            <form id="form1" class="form-horizontal" method="post">
+                <div class="form-group">
+                    <div class="col-sm-12">
+                        <textarea onmouseover="this.focus();" id="srcText" name="srcText" class="form-control"
+                        rows="14" style="max-height: 2222px;" placeholder="请输入要排版的文本内容" data-original-title="">
+                        </textarea>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-12">
+                        <input onclick="format()" value="一键排版" type="button" name="body" class="btn btn-success">
+                        <input class="btn btn-success" onclick="formatjs()" value="清除HTML标签" type="button"
+                        name="body">
+                        <input onclick="format3()" value="添加空行" type="button" name="body3" class="btn btn-success">
+                        <input onclick="format4()" value="英文标点转中文标点" type="button" name="chang"
+                        class="btn btn-success">
+                        <input id="buttonj2f" title="简繁转换" onclick="j2f()" value="简-&gt;繁" type="button"
+                        name="jachang" class="btn btn-success">
+                        <input onclick="CheckWords()" value="检查错别字" type="button" name="errword"
+                        class="btn btn-success">
+                        <input onclick="chklen()" value="统计字数" type="button" name="len" class="btn btn-success">
+                        <button type="button" class="btn btn-danger" onclick="javascript:$(&#39;#srcText&#39;).val(&#39;&#39;).focus(); ">
+                            清空输入框
+                        </button>
+                        <span id="copyallcode" class="btn btn-success" data-clipboard-target="#srcText">
+                            复制排版内容
+                        </span>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="accordion-group">
+            <div id="demo1" class="in collapse bs-docs-demoexample">
+                <h4 style="color: #66be8c; margin-bottom: 20px;">
+                    在线自动排版工具:短文文章一键排版,Html文本段落排版工具
+                </h4>
+                <h5>
+                    1,可用于小说,论文排版,自动排版,实现纯文本文章的在线排版服务
+                </h5>
+                <h5>
+                    2,一键让杂乱的文字按指定排版格式显示,使文章更漂亮,更易读
+                </h5>
+                <h5>
+                    3,轻松搞定繁体字排版哦,让文章排列方式清晰明了
+                </h5>
+            </div>
+        </div>
+        <div class="accordion-group">
+        </div>
+        <div class="copyright" id="FootLinkStr">
+            <div class="container">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <span>
+                            Copyright © 在线工具大全
+                            <a href="javascript:history.back()">
+                                返回上一页
+                            </a>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <a class="gotop" href="http://wap.zhiyun666.xyz/zt/html/h/html.html#"
+        title="返回顶部" style="display: none;">
+            <span class="arrow">
+            </span>
+            <span class="arrow lit">
+            </span>
+        </a>
+        <script src="https://newcdnjs.wawacm.com/tool/static/jquery-1.11.3.min.js" type="text/javascript">
+        </script>
+        <script type="text/javascript" src="https://newcdnjs.wawacm.com/tool/static/zm(1).js">
+        </script>
+        <script src="https://newcdnjs.wawacm.com/tool/static/bootstrap3.5min.js" type="text/javascript">
+        </script>
+        <script src="https://newcdnjs.wawacm.com/tool/static/filesave.js" type="text/javascript">
+        </script>
+        <script src="https://newcdnjs.wawacm.com/tool/static/clipboard.min.js" type="text/javascript">
+        </script>
+        <script src="https://newcdnjs.wawacm.com/tool/static/mainjs.js" type="text/javascript">
+        </script>
+        <script src="https://newcdnjs.wawacm.com/tool/static/autostyleformat.js" type="text/javascript">
+        </script>
+    </body>
+
+</html>
