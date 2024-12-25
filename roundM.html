@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>聖誕節隨機轉盤</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+    <!-- 引入样式 -->
+    <!-- Import style -->
+    <link
+            rel="stylesheet"
+            href="https://cdn.staticfile.net/element-plus/2.5.1/index.css"
+    />
+    <!-- Import Vue 3 -->
+    <script src="https://cdn.staticfile.net/vue/3.3.4/vue.global.js"></script>
+    <!-- Import component library -->
+    <script src="https://cdn.staticfile.net/element-plus/2.5.1/index.full.min.js"></script>
+    <style>
+        /* 样式参考自https://www.cnblogs.com/wenruo/p/9732704.html*/
+        * { /* 重置默认样式 */
+            margin: 0;
+            padding: 0;
+            border: none;
+            outline: none;
+            user-select: none;
+        }
+
+        .el-message-box {
+            width: auto;
+        }
+
+        .el-dialog__body {
+            padding: 20px;
+        }
+
+        #toEat {
+            text-align: center;
+        }
+
+        .wrapper {
+            position: relative;
+            height: 200px;
+            width: 200px;
+            padding: 20px;
+            background-color: #ff5555;
+            box-shadow: #000000 0px 0px 10px;
+            border-radius: 50%;
+            margin: 20px auto;
+        }
+
+        .light {
+            position: absolute;
+            height: 10px;
+            width: 10px;
+            border-radius: 50%;
+            top: 5px;
+            left: 115px;
+            transform-origin: 5px 115px;
+        }
+
+        .light-twinkling {
+            animation: 1s twinkling 3, 100ms 3s twinkling 3;
+        }
+
+        .light:nth-child(2n) {
+            background-color: #fafce7;
+        }
+
+        .light:nth-child(2n+1) {
+            background-color: #ffe58b;
+        }
+
+        .light:nth-child(2) {
+            transform: rotate(36deg);
+        }
+
+        .light:nth-child(3) {
+            transform: rotate(72deg);
+        }
+
+        .light:nth-child(4) {
+            transform: rotate(108deg);
+        }
+
+        .light:nth-child(5) {
+            transform: rotate(144deg);
+        }
+
+        .light:nth-child(6) {
+            transform: rotate(180deg);
+        }
+
+        .light:nth-child(7) {
+            transform: rotate(216deg);
+        }
+
+        .light:nth-child(8) {
+            transform: rotate(252deg);
+        }
+
+        .light:nth-child(9) {
+            transform: rotate(288deg);
+        }
+
+        .light:nth-child(10) {
+            transform: rotate(324deg);
+        }
+
+        .panel {
+            position: relative;
+            height: 200px;
+            width: 200px;
+            background-color: #b7b7b7;
+            border-radius: 100px;
+        }
+
+        .sector {
+            position: absolute;
+            left: 100px;
+            top: 0px;
+            width: 100px;
+            height: 200px;
+            font-size: 14px;
+            border-radius: 0px 100px 100px 0;
+            overflow: hidden;
+            transform-origin: left center;
+        }
+
+        .sector:nth-child(1) {
+            transform: rotate(-18deg);
+        }
+
+        .sector:nth-child(2) {
+            transform: rotate(18deg);
+        }
+
+        .sector:nth-child(3) {
+            transform: rotate(54deg);
+        }
+
+        .sector:nth-child(4) {
+            transform: rotate(90deg);
+        }
+
+        .sector:nth-child(5) {
+            transform: rotate(126deg);
+        }
+
+        .sector:nth-child(6) {
+            transform: rotate(162deg);
+        }
+
+        .sector:nth-child(7) {
+            transform: rotate(198deg);
+        }
+
+        .sector:nth-child(8) {
+            transform: rotate(234deg);
+        }
+
+        .sector:nth-child(9) {
+            transform: rotate(270deg);
+        }
+
+        .sector:nth-child(10) {
+            transform: rotate(306deg);
+        }
+
+        .sector:nth-child(2n+1) .sector-inner {
+            background: #fef6e0;
+        }
+
+        .sector:nth-child(2n) .sector-inner {
+            background: #ffffff;
+        }
+
+        .sector-inner {
+            text-align: center;
+            display: block;
+            width: 40px;
+            padding: 5px 3px 0 57px;
+            height: 195px;
+            transform: translateX(-100px) rotate(36deg);
+            transform-origin: right center;
+            border-radius: 100px 0 0 100px;
+        }
+
+        .sector-inner span {
+            display: block;
+            transform-origin: center;
+            transform: rotate(-19deg);
+            color: #d46854;
+        }
+
+        .pointer-trans {
+            transition: transform 3s cubic-bezier(.2, .93, .43, 1);
+        }
+
+        .pointer {
+            position: absolute;
+            left: 79px;
+            top: 79px;
+            z-index: 10;
+            height: 30px;
+            width: 30px;
+            padding: 6px;
+            color: #fff899;
+            line-height: 15px;
+            font-size: 12px;
+            text-align: center;
+            background-color: #ff5350;
+            border-radius: 50%;
+            border: 1px solid #ff5350;
+        }
+
+        .pointer::after {
+            content: '';
+            position: absolute;
+            left: 14px;
+            top: -24px;
+            border-width: 12px 6px;
+            border-style: solid;
+            border-color: transparent;
+            border-bottom-color: #ff5350;
+            transform-origin: center;
+        }
+
+        .button {
+            cursor: pointer;
+            padding: 5px;
+            margin: 20px auto;
+            max-width: 100px;
+            background-color: #d46854;
+            color: #fff;
+            text-align: center;
+            border-radius: 4px;
+        }
+
+        .result {
+            height: 50px;
+            line-height: 50px;
+            text-align: center;
+            margin: 0 auto;
+        }
+
+        /*背景层*/
+        #popLayer {
+            display: none;
+            background-color: #B3B3B3;
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 10;
+            -moz-opacity: 0.8;
+            opacity: .80;
+            filter: alpha(opacity=80); /* 只支持IE6、7、8、9 */
+        }
+
+        #popBox {
+            background-color: #FFFFFF;
+            z-index: 11;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 3px 3px 5px #2D2C3B;
+        }
+
+        #popBox .content {
+            padding: 15px;
+            font-size: 14px;
+            text-align: left;
+            line-height: 25px;
+        }
+
+        #popBox .close {
+            text-align: right;
+            margin-right: 5px;
+            font-size: 12px;
+            height: 25px;
+            line-height: 25px;
+            background-color: #F8F8F8;
+        }
+
+        /*关闭按钮*/
+        #popBox .close a {
+            color: #2D2C3B;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        .content-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .popBox-list {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0;
+        }
+
+        .popBox-list__text {
+            text-align: left;
+            width: 170px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        .random-button {
+            margin-bottom: 10px;
+        }
+        .footer {
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            background-color: #f8f9fa;
+            padding: 10px 0;
+            font-size: 16px;
+        }
+
+        @keyframes twinkling {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+<div id="toEat">
+    <div class="wrapper">
+        <div :class="['light', onRotation ? 'light-twinkling' : '']" v-for="(light, i) in foodList" :key="i"></div>
+        <div class="panel">
+            <div class="sector" v-for="(food, i) in foodList" :key="i">
+                <div class="sector-inner">
+                    <span>{{ food }}</span>
+                </div>
+            </div>
+            <div :class="['pointer', onRotation ? 'pointer-trans' : '']"
+                 @transitionend="afterTransitionend"
+                 @click="handleClick">
+                交換禮物
+            </div>
+        </div>
+    </div>
+    <div class="result">{{ result }}</div>
+    <div class="random-button">
+        <el-button @click="handleRandom">随机转盘配置</el-button>
+        <el-button type="primary" plain @click="handleEditRandomList">自定义随机列表</el-button>
+    </div>
+    <el-button type="danger" plain @click="showEdit = true">自定义当前配置</el-button>
+    <el-dialog title="当前配置" v-model="showEdit" width="336px">
+        <div class="content">
+            <div>
+                <ul>
+                    <li class="popBox-list" v-for="(food, index) in foodList" :key="index">
+                        <span class="popBox-list__text"> {{ food }}</span>
+                        <el-button size="small" @click="handleRandomOne(index)">随机</el-button>
+                        <el-button size="small" type="primary" plain @click="handleEdit(index)">修改</el-button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </el-dialog>
+    <el-dialog
+            title="提示"
+            v-model="dialogVisible"
+            width="336px">
+        <el-input
+                type="textarea"
+                :rows="10"
+                placeholder="请输入内容"
+                v-model="randomListText">
+        </el-input>
+        <span style="font-size: 12px;text-align: left">请使用空格对人名进行分隔，如：“張三 李四 王五”</span>
+        <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="saveRandomList">确 定</el-button>
+      </span>
+    </el-dialog>
+</div>
+<script type="module">
+    const { createApp, ref } = Vue;
+    const { ElMessage, ElMessageBox } = ElementPlus;
+
+    const toEat = createApp({
+        setup() {
+            // 当前转盘数据
+            let foodList = ref(["遠繁", "欣怡", "再來一次", "再來一次", "凱平", "再來一次", "再來一次", "以煌", "婕妤", "再來一次"]);
+            // 转盘旋转状态
+            let onRotation = ref(false);
+
+            // 转盘文本结果
+            let result = ref('');
+            // 用于保存下一次状态的对象
+            let nextStatus = {};
+
+            // 随机备用列表
+            let randomList = ["遠繁", "欣怡", "再來一次", "再來一次", "凱平", "再來一次", "再來一次", "以煌", "婕妤", "再來一次"];
+
+            // 点击转盘事件
+            function handleClick() {
+                if (onRotation.value) return; // 如果在旋转，忽略点击
+                reset(); // 重置
+                onRotation.value = true; // 开启旋转状态 禁止点击事件
+                getReward(); // 获取结果
+            }
+
+            // 重置转盘
+            function reset() {
+                onRotation.value = false;
+                result.value = '';
+            }
+
+            // 获得当前结果
+            function getReward() {
+                const pointer = document.getElementsByClassName('pointer')[0];
+                let currentDeg = nextStatus.deg ? nextStatus.deg : 0; // 如果当前已有角度则获取角度，没则为0
+                // 多旋转三圈(1080度)到四圈(1440度)随机
+                let rotateDeg = Math.random() * 360 + 1080;
+                currentDeg += rotateDeg; 
+                // 得到结果对应的文字下标
+                // 36度为一个区块，+18是让结果落到中间
+                let rewardText = foodList.value[Math.floor((currentDeg + 18) % 360 / 36)];
+                nextStatus = {
+                    deg: currentDeg,
+                    food: rewardText
+                };
+                pointer.style.transform = `rotateZ(${currentDeg}deg)`;
+            }
+
+            // 转盘旋转后事件
+            function afterTransitionend() {
+                setTimeout(() => {
+                    onRotation.value = false; // 结束旋转状态
+                    result.value = `你抽中了！${nextStatus.food}的禮物`; 
+                    
+                    // ========= 新增核心逻辑 =========
+                    if (nextStatus.food !== '再來一次') {
+                        // 找到抽中的人名所在的索引
+                        const idx = foodList.value.findIndex(item => item === nextStatus.food);
+                        if (idx !== -1) {
+                            // 将该人名替换为"再來一次"，避免重复抽中
+                            foodList.value[idx] = '再來一次';
+                        }
+                    }
+                    // ========= 新增核心逻辑 =========
+
+                }, 300);
+            }
+
+            // 生成一个指定区间的随机数
+            function randomNumBoth(Min, Max) {
+                const Range = Max - Min;
+                const Rand = Math.random();
+                return Min + Math.floor(Rand * Range);
+            }
+
+            // 手动随机整套配置
+            function handleRandom() {
+                let newArr = [...randomList]; // 深拷贝
+                foodList.value = foodList.value.map(() => {
+                    const index = randomNumBoth(0, newArr.length);
+                    const item = newArr[index];
+                    newArr.splice(index, 1); // 去重
+                    return item;
+                });
+                // 如果已经转过一次，需要更新当前结果的名字
+                if (!nextStatus.deg) return;
+                let currentDeg = nextStatus.deg;
+                nextStatus.food = foodList.value[Math.floor((currentDeg + 18) % 360 / 36)];
+                //result.value = `你抽中了！${nextStatus.food}的禮物`;
+            }
+
+            // 先随机一次，初始化
+            handleRandom();
+
+            let dialogVisible = ref(false);
+            let randomListText = ref('');
+
+            // 弹框 - 自定义随机列表
+            function handleEditRandomList() {
+                dialogVisible.value = true;
+                randomListText.value = randomList.join(' ');
+            }
+
+            // 保存随机禮物列表
+            function saveRandomList() {
+                reset();
+                dialogVisible.value = false;
+                randomList = randomListText.value.split(' ');
+            }
+
+            // 自定义当前配置
+            let showEdit = ref(false);
+
+            // 手动随机单个配置
+            function handleRandomOne(index) {
+                const number = randomNumBoth(0, randomList.length);
+                const isResult = foodList.value[index] === nextStatus.food; // 修改的是否是当前结果
+                foodList.value[index] = randomList[number];
+                ElMessage({
+                    type: 'success',
+                    message: '已随机为: ' + randomList[number]
+                });
+                // 如果当前结果还没转过或者修改的不是当前结果，就不用更新
+                if (!nextStatus.deg || !isResult) return;
+                nextStatus.food = randomList[number];
+                result.value = `你抽中了！${nextStatus.food}的禮物`;
+            }
+
+            // 手动修改单个配置
+            function handleEdit(index) {
+                ElMessageBox.prompt(`请输入需要替换「${foodList.value[index]}」的禮物`, '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                }).then(({ value }) => {
+                    if (!value) return;
+                    ElMessage({
+                        type: 'success',
+                        message: '已修改为: ' + value
+                    });
+                    const isResult = foodList.value[index] === nextStatus.food;
+                    foodList.value[index] = value;
+                    if (!nextStatus.deg || !isResult) return;
+                    nextStatus.food = value;
+                    result.value = `你抽中了！${nextStatus.food}的禮物`;
+                }).catch(() => {
+                    ElMessage({
+                        type: 'info',
+                        message: '取消修改'
+                    });
+                });
+            }
+
+            return {
+                onRotation,
+                foodList,
+                result,
+                dialogVisible,
+                randomListText,
+                showEdit,
+
+                handleClick,
+                afterTransitionend,
+                handleRandom,
+                handleEditRandomList,
+                saveRandomList,
+                handleRandomOne,
+                handleEdit
+            }
+        },
+    });
+
+    toEat.use(ElementPlus);
+    toEat.mount('#toEat');
+</script>
+<div class="footer">
+  © 2024 娃娃團隊版權所有，專為質管2A班所製！
+</div>
+</body>
+</html>
