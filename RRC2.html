@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>双色球摇奖机风格点名系统</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f0f0f0;
+            padding: 20px;
+        }
+
+        /* 缩小外面装名字的大球尺寸 */
+        .lottery-machine {
+            position: relative;
+            width: 500px;
+            height: 500px;
+            border: 5px solid #333;
+            border-radius: 50%;
+            background: radial-gradient(circle, #fff 30%, #e0e0e0 100%);
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 增大里面带名字的球的尺寸 */
+        .ball {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 10%, transparent 70%);
+            transition: all 0.02s;
+        }
+
+        /* 定义闪烁动画 */
+        @keyframes blink {
+            0% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.3;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .ball.blinking {
+            animation: blink 1s infinite;
+        }
+
+        .exit {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 80px;
+            border: 5px solid #333;
+            border-top: none;
+            background: radial-gradient(circle, #fff 30%, #e0e0e0 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        button {
+            padding: 15px 40px;
+            font-size: 20px;
+            margin: 15px;
+            cursor: pointer;
+            border: none;
+            border-radius: 30px;
+            color: #fff;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        button:active {
+            transform: translateY(2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        #startBtn {
+            background: linear-gradient(135deg, #2196F3, #64B5F6);
+        }
+
+        #importBtn {
+            background: linear-gradient(135deg, #4CAF50, #81C784);
+        }
+
+        #addBtn {
+            background: linear-gradient(135deg, #00BCD4, #4DD0E1);
+        }
+
+        #deleteBtn {
+            background: linear-gradient(135deg, #f44336, #e57373);
+        }
+
+        #resetBtn {
+            background: linear-gradient(135deg, #FF9800, #FFB74D);
+        }
+
+        #toggleBtn {
+            background: linear-gradient(135deg, #9C27B0, #BA68C8);
+            width: 300px;
+        }
+
+        #countdown {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 40px;
+            color: #f44336;
+            text-shadow: 2px 2px 4px rgba(255, 0, 0, 0.3);
+        }
+
+        #import-input {
+            display: none;
+        }
+
+        #add-input {
+            padding: 15px;
+            font-size: 20px;
+            margin: 15px;
+            border: 1px solid #ccc;
+            border-radius: 30px;
+        }
+
+        #delete-input {
+            padding: 15px;
+            font-size: 20px;
+            margin: 15px;
+            border: 1px solid #ccc;
+            border-radius: 30px;
+        }
+
+        #hiddenButtons {
+            display: none;
+        }
+
+        #numSelect {
+            padding: 15px;
+            font-size: 20px;
+            margin: 15px;
+            border: 1px solid #ccc;
+            border-radius: 30px;
+        }
+
+        #repeatCheckbox {
+            margin: 15px;
+        }
+
+        .option-group {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #student-list-container {
+            margin-top: 20px;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            background-color: #f9f9f9;
+        }
+
+        #student-list-container h3 {
+            margin: 0 0 15px 0;
+            color: #333;
+            text-align: center;
+        }
+
+        #student-list {
+            max-height: 200px;
+            overflow-y: auto;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .student-item {
+            display: flex;
+            align-items: center;
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border: 1px solid #90caf9;
+            border-radius: 20px;
+            padding: 8px 12px;
+            margin: 2px;
+            font-size: 14px;
+        }
+
+        .student-name {
+            margin-right: 8px;
+            color: #1976d2;
+            font-weight: bold;
+        }
+
+        .delete-student-btn {
+            background: linear-gradient(135deg, #ff5722, #ff7043);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .delete-student-btn:hover {
+            background: linear-gradient(135deg, #d32f2f, #f44336);
+            transform: scale(1.1);
+        }
+
+        /* 版权声明样式 */
+        .copyright {
+            position: fixed;
+            bottom: 10px;
+            right: 15px;
+            font-size: 12px;
+            color: #666;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 5px 10px;
+            border-radius: 15px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            font-family: Arial, sans-serif;
+        }
+
+        .copyright a {
+            color: #1976d2;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+
+        .copyright a:hover {
+            color: #0d47a1;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="lottery-machine">
+        <div id="countdown">3</div>
+        <div class="exit" id="exit"></div>
+    </div>
+    <div class="option-group">
+        <select id="numSelect">
+            <option value="1">1 名</option>
+            <option value="2">2 名</option>
+            <option value="3">3 名</option>
+            <option value="4">4 名</option>
+            <option value="5">5 名</option>
+        </select>
+        <input type="checkbox" id="repeatCheckbox"> 允许学生重复抽取
+    </div>
+    <button id="startBtn">开始抽奖（击球）</button>
+    <button id="toggleBtn">展开/隐藏设置</button>
+    <div id="hiddenButtons">
+        <button id="importBtn">导入学生名字（Excel）</button>
+        <input type="text" id="add-input" placeholder="输入要添加的学生姓名">
+        <button id="addBtn">添加</button>
+        <input type="text" id="delete-input" placeholder="输入要删除的学生姓名">
+        <button id="deleteBtn">删除</button>
+        <button id="resetBtn">重置抽取记录</button>
+        
+        <!-- 学生列表显示和自定义删除 -->
+        <div id="student-list-container">
+            <h3>当前学生列表：</h3>
+            <div id="student-list"></div>
+        </div>
+    </div>
+    <input type="file" id="import-input" accept=".xlsx,.xls">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        // 学生名单，每次刷新后重新开始
+        let students = [];
+        const lotteryMachine = document.querySelector('.lottery-machine');
+        const startBtn = document.getElementById('startBtn');
+        const countdownElement = document.getElementById('countdown');
+        const exitElement = document.getElementById('exit');
+        const importBtn = document.getElementById('importBtn');
+        const importInput = document.getElementById('import-input');
+        const addInput = document.getElementById('add-input');
+        const addBtn = document.getElementById('addBtn');
+        const deleteInput = document.getElementById('delete-input');
+        const deleteBtn = document.getElementById('deleteBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const toggleBtn = document.getElementById('toggleBtn');
+        const hiddenButtons = document.getElementById('hiddenButtons');
+        const numSelect = document.getElementById('numSelect');
+        const repeatCheckbox = document.getElementById('repeatCheckbox');
+        const studentListContainer = document.getElementById('student-list');
+        let intervalId;
+        let timeoutId;
+        let isRunning = false;
+        let groups = [];
+        let drawnStudents = [];
+
+        function getRandomColor() {
+            const hue = Math.floor(Math.random() * 360);
+            return `hsl(${hue}, 70%, 60%)`;
+        }
+
+        // 更新学生列表显示
+        function updateStudentList() {
+            studentListContainer.innerHTML = '';
+            if (students.length === 0) {
+                studentListContainer.innerHTML = '<p style="text-align: center; color: #666;">暂无学生</p>';
+                return;
+            }
+            
+            students.forEach((student, index) => {
+                const studentItem = document.createElement('div');
+                studentItem.className = 'student-item';
+                
+                const studentName = document.createElement('span');
+                studentName.className = 'student-name';
+                studentName.textContent = student;
+                
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-student-btn';
+                deleteBtn.innerHTML = '×';
+                deleteBtn.title = `删除 ${student}`;
+                deleteBtn.onclick = () => deleteStudentByIndex(index);
+                
+                studentItem.appendChild(studentName);
+                studentItem.appendChild(deleteBtn);
+                studentListContainer.appendChild(studentItem);
+            });
+        }
+
+        // 通过索引删除学生
+        function deleteStudentByIndex(index) {
+            if (index >= 0 && index < students.length) {
+                const studentName = students[index];
+                students.splice(index, 1);
+                
+                // 同时从已抽中列表中移除（如果存在）
+                const drawnIndex = drawnStudents.indexOf(studentName);
+                if (drawnIndex !== -1) {
+                    drawnStudents.splice(drawnIndex, 1);
+                }
+                
+                // 更新显示
+                updateStudentList();
+                
+                // 清除现有的球，以便重新生成
+                const balls = document.querySelectorAll('.ball');
+                balls.forEach(ball => ball.remove());
+                
+                console.log(`已删除学生: ${studentName}`);
+            }
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function divideStudentsIntoGroups() {
+            const availableStudents = students.filter(student => !drawnStudents.includes(student));
+            const shuffledStudents = shuffleArray([...availableStudents]);
+            groups = [];
+            for (let i = 0; i < shuffledStudents.length; i += 10) {
+                groups.push(shuffledStudents.slice(i, i + 10));
+            }
+        }
+
+        function createBalls(selectedGroup) {
+            if (!Array.isArray(selectedGroup)) {
+                console.error('createBalls需要传入数组参数');
+                return;
+            }
+            selectedGroup.forEach((student) => {
+                const ball = document.createElement('div');
+                ball.classList.add('ball');
+                ball.textContent = student;
+                const x = Math.random() * (lotteryMachine.offsetWidth - 80);
+                const y = Math.random() * (lotteryMachine.offsetHeight - 80);
+                ball.style.left = `${x}px`;
+                ball.style.top = `${y}px`;
+                ball.style.backgroundColor = getRandomColor();
+                lotteryMachine.appendChild(ball);
+            });
+        }
+
+        function strikeBalls() {
+            const balls = document.querySelectorAll('.ball');
+            balls.forEach((ball) => {
+                ball.velocityX = (Math.random() - 0.5) * 60;
+                ball.velocityY = (Math.random() - 0.5) * 60;
+            });
+        }
+
+        function moveBalls() {
+            const balls = document.querySelectorAll('.ball');
+            balls.forEach((ball) => {
+                let newX = parseFloat(ball.style.left) + ball.velocityX;
+                let newY = parseFloat(ball.style.top) + ball.velocityY;
+
+                if (newX < 0 || newX > lotteryMachine.offsetWidth - 80) {
+                    ball.velocityX = -ball.velocityX;
+                }
+                if (newY < 0 || newY > lotteryMachine.offsetHeight - 80) {
+                    ball.velocityY = -ball.velocityY;
+                }
+
+                ball.style.left = `${newX}px`;
+                ball.style.top = `${newY}px`;
+            });
+        }
+
+        function scaleAndCenterBall(selectedBall, index, selectedCount) {
+            selectedBall.style.width = '160px';
+            selectedBall.style.height = '160px';
+            selectedBall.style.fontSize = '40px';
+            if (selectedCount === 1) {
+                const centerX = (lotteryMachine.offsetWidth - 160) / 2;
+                const centerY = (lotteryMachine.offsetHeight - 160) / 2;
+                selectedBall.style.left = `${centerX}px`;
+                selectedBall.style.top = `${centerY}px`;
+            } else {
+                const centerX = (lotteryMachine.offsetWidth - 160) / 2;
+                const centerY = (lotteryMachine.offsetHeight - 160) / 2;
+                const angle = (2 * Math.PI * index) / selectedCount;
+                const radius = 120;
+                const newX = centerX + radius * Math.cos(angle);
+                const newY = centerY + radius * Math.sin(angle);
+                selectedBall.style.left = `${newX}px`;
+                selectedBall.style.top = `${newY}px`;
+            }
+            // 给选中的球添加闪烁类名
+            selectedBall.classList.add('blinking');
+            // 为不同的球设置不同颜色
+            selectedBall.style.backgroundColor = getRandomColor();
+        }
+
+        // 新增语音播报功能
+        function speakName(name) {
+            const utterance = new SpeechSynthesisUtterance(name);
+            utterance.lang = 'zh-CN';
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function startLottery() {
+            if (isRunning) return;
+            startBtn.disabled = true;
+            countdownElement.textContent = '3'; // 抽奖时间改为3秒
+
+            // 清理之前的所有球，确保画面干净
+            const existingBalls = document.querySelectorAll('.ball');
+            existingBalls.forEach(ball => ball.remove());
+
+            const selectedCount = parseInt(numSelect.value);
+            const allowRepeat = repeatCheckbox.checked;
+            let availableStudents;
+            if (allowRepeat) {
+                availableStudents = students;
+            } else {
+                availableStudents = students.filter(student => !drawnStudents.includes(student));
+                if (availableStudents.length < selectedCount) {
+                    alert(`剩余学生不足 ${selectedCount} 个，无法进行抽奖！`);
+                    startBtn.disabled = false;
+                    return;
+                }
+            }
+
+            isRunning = true;
+            createBalls(availableStudents);
+            strikeBalls();
+            intervalId = setInterval(moveBalls, 20);
+            let startTime = Date.now();
+            const countdownDuration = 3000; // 倒计时总时长改为3秒
+
+            timeoutId = setInterval(() => {
+                const elapsedTime = Date.now() - startTime;
+                const remainingTime = Math.max(0, countdownDuration - elapsedTime);
+                const seconds = Math.floor(remainingTime / 1000);
+                countdownElement.textContent = seconds;
+
+                if (remainingTime <= 0) {
+                    clearInterval(intervalId);
+                    clearInterval(timeoutId);
+                    const balls = Array.from(document.querySelectorAll('.ball'));
+                    const selectedBalls = [];
+                    const currentDrawnStudents = []; // 记录本次抽中的学生
+                    console.log('=== 点名抽取开始 ===');
+                    console.log(`抽取时间: ${new Date().toLocaleString()}`);
+                    console.log(`抽取人数: ${selectedCount}`);
+                    console.log(`允许重复: ${allowRepeat ? '是' : '否'}`);
+                    for (let i = 0; i < selectedCount; i++) {
+                        const randomIndex = Math.floor(Math.random() * balls.length);
+                        const selectedBall = balls[randomIndex];
+                        if (!allowRepeat) {
+                            balls.splice(randomIndex, 1);
+                        }
+                        selectedBalls.push(selectedBall);
+                        currentDrawnStudents.push(selectedBall.textContent);
+                        console.log(`第${i + 1}位抽中: ${selectedBall.textContent}`);
+                        // 只有在不允许重复时才将学生添加到已抽中列表
+                        if (!allowRepeat) {
+                            drawnStudents.push(selectedBall.textContent);
+                        }
+                        scaleAndCenterBall(selectedBall, i, selectedCount);
+                        speakName(selectedBall.textContent); // 语音播报中奖者
+                    }
+                    if (!allowRepeat) {
+                        balls.forEach((ball) => ball.remove());
+                    } else {
+                        // 只保留抽中的球
+                        balls.forEach((ball) => {
+                            if (!selectedBalls.includes(ball)) {
+                                ball.remove();
+                            }
+                        });
+                    }
+                    // 打印抽取结果汇总
+                    console.log('=== 抽取结果汇总 ===');
+                    console.log(`本次抽中学生: ${currentDrawnStudents.join(', ')}`);
+                    if (!allowRepeat) {
+                        console.log(`累计已抽中学生: ${drawnStudents.join(', ')}`);
+                        console.log(`剩余可抽学生数: ${students.length - drawnStudents.length}`);
+                    }
+                    console.log('=== 点名抽取结束 ===\n');
+                    isRunning = false;
+                    startBtn.disabled = false;
+                }
+            }, 100);
+        }
+
+        function handleFileImport(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                    const newStudents = [];
+                    jsonData.forEach(row => {
+                        if (row.length > 0 && row[0]) {
+                            const studentName = String(row[0]).trim();
+                            // 过滤掉纯数字、空字符串和无效数据
+                            if (studentName && !(/^\d+$/.test(studentName)) && studentName.length > 0) {
+                                newStudents.push(studentName);
+                            }
+                        }
+                    });
+                    students = newStudents;
+                    drawnStudents = [];
+                    updateStudentList(); // 更新学生列表显示
+                };
+                reader.readAsArrayBuffer(file);
+            }
+        }
+
+        function addStudent() {
+            const studentToAdd = addInput.value.trim();
+            if (studentToAdd) {
+                // 检查学生是否已存在
+                if (students.includes(studentToAdd)) {
+                    alert('该学生已存在！');
+                    return;
+                }
+                // 添加学生到数组
+                students.push(studentToAdd);
+                // 清空输入框
+                addInput.value = '';
+                // 更新学生列表显示
+                updateStudentList();
+                // 清除现有的球，以便重新生成
+                const balls = document.querySelectorAll('.ball');
+                balls.forEach(ball => ball.remove());
+                alert('学生添加成功！');
+            } else {
+                alert('请输入学生姓名！');
+            }
+        }
+
+        function deleteStudent() {
+            const studentToDelete = deleteInput.value.trim();
+            if (studentToDelete) {
+                const index = students.indexOf(studentToDelete);
+                if (index !== -1) {
+                    students.splice(index, 1);
+                    const drawnIndex = drawnStudents.indexOf(studentToDelete);
+                    if (drawnIndex !== -1) {
+                        drawnStudents.splice(drawnIndex, 1);
+                    }
+                    deleteInput.value = '';
+                    updateStudentList(); // 更新学生列表显示
+                    const balls = document.querySelectorAll('.ball');
+                    balls.forEach(ball => ball.remove());
+                }
+            }
+        }
+
+        function resetDrawnStudents() {
+            drawnStudents = [];
+            const balls = document.querySelectorAll('.ball');
+            balls.forEach(ball => {
+                ball.remove();
+                ball.classList.remove('blinking'); // 移除闪烁类名
+            });
+            exitElement.textContent = '';
+        }
+
+        function toggleButtons() {
+            if (hiddenButtons.style.display === 'none') {
+                hiddenButtons.style.display = 'block';
+                toggleBtn.textContent = '隐藏设置';
+            } else {
+                hiddenButtons.style.display = 'none';
+                toggleBtn.textContent = '展开设置';
+            }
+        }
+
+        startBtn.addEventListener('click', startLottery);
+        importBtn.addEventListener('click', () => importInput.click());
+        importInput.addEventListener('change', handleFileImport);
+        addInput.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+                addStudent();
+            }
+        });
+        addBtn.addEventListener('click', addStudent);
+        deleteInput.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+                deleteStudent();
+            }
+        });
+        deleteBtn.addEventListener('click', deleteStudent);
+        resetBtn.addEventListener('click', resetDrawnStudents);
+        toggleBtn.addEventListener('click', toggleButtons);
+        
+        // 页面加载时初始化学生列表显示
+        updateStudentList();
+    </script>
+    
+    <!-- 版权声明 -->
+    <div class="copyright">
+        版权： <a href="https://www.yava.pw" target="_blank">娃娃团队</a>
+    </div>
+</body>
+
+</html>
