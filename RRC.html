@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学生随机点名系统 by娃娃团队</title>
+    <script src="https://cdn.staticfile.net/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        body { font-family: 'Microsoft YaHei', sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; background-color: #f5f5f5; }
+        h1 { color: #333; text-align: center; }
+        .container { background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .upload-section, .controls, .result-section { margin-bottom: 20px; padding: 15px; border-radius: 5px; }
+        .upload-section { background-color: #f0f8ff; }
+        .result-section { background-color: #fffaf0; min-height: 100px; }
+        .student-list { margin-top: 15px; max-height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 5px; }
+        button { background-color: #4CAF50; color: white; border: none; padding: 10px 15px; font-size: 16px; margin: 4px 2px; cursor: pointer; border-radius: 4px; }
+        button:hover { background-color: #45a049; }
+        .controls button, .controls input { vertical-align: middle; }
+        .selected { background-color: #ffeb3b; padding: 5px; margin: 2px; border-radius: 3px; display: inline-block; }
+        .flashing-name { font-size: 24px; font-weight: bold; text-align: center; padding: 20px; background-color: #ff9800; color: white; border-radius: 8px; margin: 15px 0; min-height: 30px; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; transition: all .3s; }
+        .flashing-fast { animation: flash 0.1s infinite; }
+        @keyframes flash { 0%{background-color:#ff9800;} 50%{background-color:#ff5722;} 100%{background-color:#ff9800;} }
+        .final-selection { background-color: #f44336; animation: none; }
+        .selected-name { margin:5px; padding:8px 15px; background:rgba(255,255,255,0.2); border-radius:20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>学生随机点名系统</h1>
+        <div class="upload-section">
+            <h2>上传学生名单</h2>
+            <input type="file" id="fileInput" accept=".txt,.csv,.xlsx,.xls">
+            <div class="file-info" id="fileInfo">支持格式: TXT, CSV, XLSX (Excel)</div>
+            <p>或手动输入学生名单（每行一个名字）：</p>
+            <textarea id="manualInput" rows="5" style="width:100%;"></textarea>
+            <button id="loadBtn">加载名单</button>
+            <label style="display:block; margin-top:10px;"><input type="checkbox" id="noRepeat"> 不重复抽中</label>
+            <div class="student-list" id="studentList"><p>当前没有加载学生名单</p></div>
+            <div class="flashing-name" id="flashingName">准备开始...</div>
+        </div>
+        <div class="controls">
+            <h2>随机点名</h2>
+            <button onclick="startFlashing()">开启随机</button>
+            <button onclick="stopFlashingAndSelect(1)">停止并选择1人</button>
+            <button onclick="stopFlashingAndSelect(2)">停止并选择2人</button>
+            <button onclick="stopFlashingAndSelect(3)">停止并选择3人</button>
+            <input type="number" id="customNumber" min="1" value="1" style="width:50px;">
+            <button onclick="stopFlashingAndSelectCustom()">自定义数量</button>
+        </div>
+        <div class="result-section">
+            <h2>点名结果</h2>
+            <div id="result"></div>
+        </div>
+    </div>
+    <script>
+        let students = [];
+        let isFlashing = false;
+        let flashInterval;
+        let lastDisplayedNames = [];
+
+        document.getElementById('loadBtn').addEventListener('click', loadStudents);
+
+        function loadStudents() {
+            const fileInput = document.getElementById('fileInput');
+            const manual = document.getElementById('manualInput').value.trim();
+            if (fileInput.files.length) {
+                const file = fileInput.files[0];
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const data = new Uint8Array(e.target.result);
+                    try {
+                        const wb = XLSX.read(data, {type:'array'});
+                        const ws = wb.Sheets[wb.SheetNames[0]];
+                        const arr = XLSX.utils.sheet_to_json(ws, {header:1});
+                        students = arr.map(r=>r[0]).filter(n=>n&&n.toString().trim());
+                    } catch {
+                        const text = new TextDecoder().decode(data);
+                        students = text.split(/\r?\n/).filter(n=>n.trim());
+                    }
+                    updateStudentList();
+                };
+                reader.readAsArrayBuffer(file);
+            } else if (manual) {
+                students = manual.split(/\r?\n/).filter(n=>n.trim());
+                updateStudentList();
+            } else {
+                alert('请上传文件或手动输入学生名单');
+            }
+        }
+
+        function updateStudentList() {
+            const el = document.getElementById('studentList');
+            if (!students.length) return el.innerHTML = '<p>当前没有加载学生名单</p>';
+            let html = `<p>已加载 ${students.length} 名学生：</p><ul>`;
+            students.forEach(n=>html+=`<li>${n}</li>`);
+            el.innerHTML = html + '</ul>';
+        }
+
+        function randomSelect(count) {
+            if (count > students.length) return [];
+            const copy = [...students];
+            const res = [];
+            for (let i=0;i<count;i++) {
+                const idx = Math.floor(Math.random()*copy.length);
+                res.push(copy.splice(idx,1)[0]);
+            }
+            return res;
+        }
+
+        function startFlashing() {
+            if (!students.length) return alert('请先加载学生名单');
+            if (isFlashing) return;
+            isFlashing = true;
+            lastDisplayedNames = [];
+            const f = document.getElementById('flashingName');
+            f.classList.add('flashing-fast'); f.classList.remove('final-selection');
+            flashInterval = setInterval(()=>{
+                const name = students[Math.floor(Math.random()*students.length)];
+                f.textContent = name;
+                lastDisplayedNames = [name];
+            },100);
+        }
+
+        function stopFlashingAndSelect(count) {
+            if (isFlashing) { clearInterval(flashInterval); isFlashing=false; }
+            let sel = count===1 && lastDisplayedNames.length ? lastDisplayedNames : randomSelect(count);
+            if (document.getElementById('noRepeat').checked) {
+                students = students.filter(n=>!sel.includes(n));
+                updateStudentList();
+            }
+            displaySelection(sel);
+        }
+
+        function stopFlashingAndSelectCustom() {
+            const c = parseInt(document.getElementById('customNumber').value);
+            if (!c||c<1) return alert('请输入有效数量');
+            stopFlashingAndSelect(c);
+        }
+
+        function displaySelection(names) {
+            const f = document.getElementById('flashingName');
+            const r = document.getElementById('result');
+            if (!names.length) { f.textContent='未选择任何学生'; return; }
+            f.classList.add('final-selection');
+            f.innerHTML = '已抽中: ' + names.map(n=>`<span class="selected-name">${n}</span>`).join(' ');
+            r.innerHTML = '<div>' + names.map(n=>`<span class="selected">${n}</span>`).join(' ') + '</div>';
+        }
+    </script>
+</body>
+</html>
