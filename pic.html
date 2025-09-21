@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>在线图片处理工具 - 图片压缩、编辑、转换、裁剪、ICO转换、修改DPI和尺寸 | 西数资源网</title>
+    <title>在线图片处理工具 - 图片压缩、编辑、转换、裁剪、ICO转换、修改DPI和尺寸 | 娃娃团队</title>
     <meta name="keywords" content="在线图片处理,图片压缩,图片编辑,图片转换,图片裁剪,ICO图标转换,修改图片DPI,调整图片尺寸,批量图片处理,免费图片工具">
     <meta name="description" content="专业在线图片处理工具，支持图片压缩、编辑、格式转换、裁剪、ICO图标制作、批量修改DPI和调整尺寸等功能，上传图片即可实时预览效果并下载，简单高效免费使用。">
     <!-- 隐藏的SEO链接 -->
     <div style="display:none;visibility:hidden;height:0;width:0;">
-        <a href="https://www.xishuzy.com" rel="nofollow">西数资源网</a>
+        <a href="https://www.yava.pw" rel="nofollow">娃娃团队</a>
     </div>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.staticfile.net/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
@@ -1598,6 +1598,7 @@
                         break;
                         
                     case 'ico':
+                        applyIco();
                         newSize = (newSize * 0.3).toFixed(2); // ICO文件通常较小
                         processedImage.title = "ICO图标";
                         break;
@@ -1771,6 +1772,35 @@
             };
         }
         
+        function applyIco() {
+            // 使用Canvas实现ICO图标转换
+            const img = new Image();
+            img.src = originalImageData.src;
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                // ICO图标通常是正方形，取较小的尺寸作为边长
+                const size = Math.min(img.width, img.height);
+                // 常见的ICO尺寸：16, 32, 48, 64, 128, 256
+                const icoSize = size > 128 ? 256 : size > 64 ? 128 : size > 32 ? 64 : size > 16 ? 32 : 16;
+                
+                canvas.width = icoSize;
+                canvas.height = icoSize;
+                
+                // 绘制缩放后的图像，保持居中
+                const scale = icoSize / size;
+                const offsetX = (icoSize - img.width * scale) / 2;
+                const offsetY = (icoSize - img.height * scale) / 2;
+                
+                ctx.drawImage(img, offsetX, offsetY, img.width * scale, img.height * scale);
+                
+                // 更新预览图
+                processedImage.src = canvas.toDataURL('image/png');
+                currentImageData.src = processedImage.src;
+            };
+        }
+
         function applyTransparent(tolerance) {
             // 使用Canvas实现背景透明化处理
             const img = new Image();
@@ -1968,7 +1998,7 @@
         
         // 下载按钮
         document.getElementById('download-btn').addEventListener('click', function() {
-            if (!processedImage.src || processedImage.src === originalImageData.src) {
+            if (!processedImage.src || processedImage.src === '' || processedImage.src === 'data:,') {
                 alert('请先处理图片再下载');
                 return;
             }
@@ -1983,7 +2013,7 @@
             originalName = originalName.replace(/[_\s]+$/, '').trim();
             // 正确提取扩展名和基础文件名
             const nameParts = originalName.split('.');
-            const extension = nameParts.length > 1 ? nameParts.pop() : 'png';
+            let extension = nameParts.length > 1 ? nameParts.pop() : 'png';
             // 确保baseName不包含多余的空格和特殊字符
             const baseName = nameParts.join('.').trim();
             
